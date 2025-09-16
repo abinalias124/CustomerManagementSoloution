@@ -1,0 +1,124 @@
+<div class="container py-4">
+    <h2 class="mb-4 text-center">🛒 My Purchase History</h2>
+  
+    <!-- Filters and Sorting -->
+    <div class="row mb-3" [formGroup]="filterForm">
+        <!-- Page Size Selector -->
+        <div class="col-md-3">
+          <label for="pageSize" class="form-label">Rows per page:</label>
+          <select id="pageSize" class="form-select" formControlName="pageSize">
+            <option *ngFor="let option of pageSizeOptions" [value]="option">{{ option }}</option>
+          </select>
+        </div>
+      
+        <div class="col-md-4">
+            <label class="form-label">Sort by:</label>
+            <div class="d-flex gap-2">
+              <select class="form-select" formControlName="sortBy">
+                <option value="CreatedAt">Date</option>
+               
+              </select>
+              <button class="btn btn-outline-secondary" (click)="toggleSortOrder()" 
+                      [title]="filterForm.get('sortOrder')?.value === 'asc' ? 'Ascending' : 'Descending'">
+                <i class="bi" [ngClass]="getSortIcon(filterForm.get('sortBy')?.value)"></i>
+              </button>
+            </div>
+          </div>
+        
+          <!-- Hidden field for sortOrder -->
+          <input type="hidden" formControlName="sortOrder">
+        </div>
+  
+    <!-- Loading -->
+    <div *ngIf="loading" class="text-center my-5">
+      <div class="spinner-border text-primary"></div>
+      <p>Loading purchases...</p>
+    </div>
+  
+    <!-- Table -->
+    <div *ngIf="!loading && purchases.length > 0" class="table-responsive shadow-sm rounded">
+      <table class="table table-hover align-middle">
+        <thead class="table-primary">
+          <tr>
+            <th></th>
+            <th>#</th>
+            <th>Net Total</th>
+            <th>
+              Date 
+              <i class="bi ms-1" 
+                 [ngClass]="getSortIcon('CreatedAt')"
+                 *ngIf="filterForm.get('sortBy')?.value === 'CreatedAt'"></i>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let purchase of purchases; let i = index">
+            <tr (click)="toggleExpand(purchase)" style="cursor: pointer;">
+              <td><i class="bi" [ngClass]="purchase.expanded ? 'bi-dash-circle' : 'bi-plus-circle'"></i></td>
+              <td>{{ (pageNumber - 1) * pageSize + (i + 1) }}</td>
+              <td>{{ purchase.NetTotal | currency:'INR' }}</td>
+              <td>{{ purchase.CreatedAt | date:'medium' }}</td>
+            </tr>
+  
+           <!-- Expanded Products -->
+<tr *ngIf="purchase.expanded">
+  <td></td>
+  <td colspan="4">
+    <div class="p-3 bg-light rounded shadow-sm product-details-container">
+      <h6 class="product-details-title"> Products in this Purchase</h6>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered mt-2 product-details-table">
+          <thead class="table-secondary">
+            <tr>
+              <th>#</th>
+              <th>Product Name</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of purchase.Items; let j = index" class="product-row">
+              <td>{{ j + 1 }}</td>
+              <td class="product-name">{{ item.ProductName }}</td>
+              <td>{{ item.Quantity }}</td>
+              <td>{{ item.UnitPrice | currency:'INR' }}</td>
+              <td class="subtotal">{{ item.Quantity * item.UnitPrice | currency:'INR' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </td>
+</tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+  
+    
+    <!-- Custom Pagination with Arrows -->
+<div *ngIf="!loading && totalCount > pageSize" class="d-flex justify-content-center align-items-center gap-3 mt-3">
+    <button class="btn btn-outline-primary" 
+            [disabled]="pageNumber === 1" 
+            (click)="pageChanged(pageNumber - 1)"
+            title="Previous Page">
+      <i class="bi bi-arrow-left"></i>
+    </button>
+  
+    <span class="fw-bold">Page {{ pageNumber }} of {{ totalPages }}</span>
+  
+    <button class="btn btn-outline-primary" 
+            [disabled]="pageNumber === totalPages" 
+            (click)="pageChanged(pageNumber + 1)"
+            title="Next Page">
+      <i class="bi bi-arrow-right"></i>
+    </button>
+  </div>
+  
+  
+    <!-- No purchases -->
+    <div *ngIf="!loading && purchases.length === 0" class="alert alert-info text-center">
+      No purchases found.
+    </div>
+  </div>

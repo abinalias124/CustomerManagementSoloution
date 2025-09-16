@@ -1,0 +1,87 @@
+.auth-wrapper {
+    height: 100vh;
+    background: #f5f7fb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .auth-container {
+    display: flex;
+    width: 900px;
+    height: 520px;
+    background: #fff;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Left side (blue curved panel) */
+  .auth-left {
+    background: #3b82f6;
+    color: white;
+    flex: 1;
+    text-align: center;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-top-right-radius: 50% 100px;
+    border-bottom-right-radius: 50% 100px;
+  }
+  
+  /* Right form area */
+  .auth-right {
+    flex: 1;
+    background: #fff;
+    padding: 3rem;
+  }
+  
+  .auth-right h3 {
+    color: #333;
+    font-weight: 600;
+  }
+  
+  /* Form styling */
+  .form-floating input {
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    padding: 12px;
+  }
+  
+  .form-floating label {
+    color: #666;
+  }
+  
+  /* Buttons */
+  .btn-primary {
+    background: #3b82f6;
+    border: none;
+    border-radius: 10px;
+    font-weight: 500;
+    padding: 12px;
+  }
+  
+  .btn-primary:hover {
+    background: #2563eb;
+  }
+  
+  .btn-light {
+    background: #fff;
+    color: #3b82f6;
+    border-radius: 10px;
+    font-weight: 500;
+    padding: 10px 20px;
+  }
+  
+  .btn-success {
+    border-radius: 10px;
+    padding: 12px;
+  }
+  
+  .forgot-link {
+    color: #3b82f6;
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+  

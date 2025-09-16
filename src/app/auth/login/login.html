@@ -1,0 +1,63 @@
+<div class="auth-wrapper d-flex align-items-center justify-content-center">
+  <div class="auth-container shadow-lg rounded">
+
+    <div class="auth-left d-flex flex-column justify-content-center align-items-center">
+      <h2 class="text-white mb-3">Hello, Welcome!</h2>
+      <p class="text-white">Don’t have an account?</p>
+      <a [routerLink]="['/register']" class="btn btn-light px-4">Register</a>
+    </div>
+
+    <div class="auth-right p-5">
+      <h3 class="mb-4 text-center">Login</h3>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+
+        <div class="form-floating mb-3">
+          <input type="email" class="form-control" id="loginEmail" formControlName="email" placeholder="Email">
+          <label for="loginEmail">Email</label>
+          @if (loginForm.get('email')?.invalid && loginForm.get('email')?.dirty) {
+            <div class="text-danger small">
+              @if (loginForm.get('email')?.errors?.['required']) {
+                <div>Email is required.</div>
+              }
+              @if (loginForm.get('email')?.errors?.['email'] || loginForm.get('email')?.errors?.['pattern']) {
+                <div>
+                  Enter a valid email address.
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+
+
+        <div class="mb-3">
+          <div class="form-floating position-relative">
+            <input [type]="showPassword ? 'text' : 'password'" class="form-control pe-5" id="loginPassword"
+              formControlName="password" placeholder="Password">
+              <label for="loginPassword">Password</label>
+
+
+              <span class="position-absolute top-50 end-0 translate-middle-y me-3" style="cursor: pointer;"
+                (click)="togglePassword()">
+                <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+              </span>
+            </div>
+
+            @if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
+              <div
+                class="text-danger small mt-1">
+                @if (loginForm.get('password')?.errors?.['required']) {
+                  <div>Password is required.</div>
+                }
+              </div>
+            }
+          </div>
+
+
+
+          <button type="submit" class="btn btn-primary w-100" [disabled]="loginForm.invalid">Login</button>
+        </form>
+      </div>
+    </div>
+  </div>

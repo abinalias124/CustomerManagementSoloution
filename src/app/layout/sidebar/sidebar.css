@@ -1,0 +1,14 @@
+.sidebar {
+    width: 220px;
+  }
+  
+  .nav-link {
+    color: #333;
+    font-weight: 500;
+  }
+  
+  .nav-link:hover {
+    background-color: #e9ecef;
+    border-radius: 4px;
+  }
+  

@@ -1,0 +1,20 @@
+.page-size-selector {
+    width: 80px;
+    display: inline-block;
+  }
+  
+  .table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+  }
+  
+  /* Style for sortable headers */
+  th {
+    cursor: pointer;
+    user-select: none;
+  }
+  
+  /* Visual indicator for current sort column */
+  .table-primary th {
+    position: relative;
+  }
+  

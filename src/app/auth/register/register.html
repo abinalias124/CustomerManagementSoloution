@@ -1,0 +1,99 @@
+<div class="auth-wrapper d-flex align-items-center justify-content-center">
+  <div class="auth-container shadow-lg rounded">
+    <div class="auth-right p-5 w-100">
+
+      <!-- Step 1: Enter Email -->
+      @if (step === 1) {
+        <form [formGroup]="emailForm" (ngSubmit)="sendOtp()">
+          <h3 class="mb-4 text-center">Register</h3>
+          <div class="form-floating mb-3">
+            <input type="email" formControlName="email" class="form-control" placeholder="Enter email">
+            <label>Email</label>
+            @if (emailForm.get('email')?.touched && emailForm.get('email')?.invalid) {
+              <div class="text-danger small mt-1">
+                @if (emailForm.get('email')?.errors?.['required']) {
+                  <div>Email is required.</div>
+                }
+                @if (emailForm.get('email')?.errors?.['pattern']) {
+                  <div>Enter a valid email address.</div>
+                }
+              </div>
+            }
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success w-100">Send OTP →</button>
+          </div>
+        </form>
+      }
+
+      <!-- Step 2: OTP + Password -->
+      @if (step === 2) {
+        <form [formGroup]="otpForm" (ngSubmit)="verifyAndRegister()">
+          <h3 class="mb-4 text-center">OTP Verification</h3>
+          <p class="text-muted">OTP sent to <b>{{ emailForm.value.email }}</b></p>
+
+          <!-- OTP -->
+         <!-- OTP -->
+<div class="d-flex justify-content-between mb-2 otp-boxes">
+  @for (ctrl of otpControls; track ctrl; let i = $index) {
+    <input type="text" maxlength="1"
+      class="form-control text-center mx-1"
+      [ngClass]="{ 'is-invalid': ctrl.touched && ctrl.invalid }"
+      [formControl]="ctrl"
+      (input)="moveToNext($event, i)">
+  }
+</div>
+@if (otpForm.get('otp')?.invalid && otpForm.touched) {
+  <div class="text-danger small mb-3">Enter all 6 digits of OTP.</div>
+}
+
+          <!-- Password -->
+          <div class="form-floating mb-3 position-relative">
+            <input [type]="showPassword ? 'text' : 'password'" formControlName="password" class="form-control pe-5"
+              placeholder="Password">
+            <label>Password</label>
+            <i class="bi"
+              [ngClass]="showPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"
+              (click)="showPassword = !showPassword"
+              style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer;"></i>
+          </div>
+          @if (otpForm.get('password')?.touched && otpForm.get('password')?.invalid) {
+            <div class="text-danger small mb-3">
+              @if (otpForm.get('password')?.errors?.['required']) {
+                <div>Password is required.</div>
+              }
+              @if (otpForm.get('password')?.errors?.['minlength']) {
+                <div>Password must be at least 8 characters long.</div>
+              }
+              @if (otpForm.get('password')?.errors?.['pattern']) {
+                <div>Password must include uppercase, lowercase, number, and special character.</div>
+              }
+            </div>
+          }
+
+          <!-- Confirm Password -->
+          <div class="form-floating mb-3 position-relative">
+            <input [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword"
+              class="form-control pe-5" placeholder="Confirm Password">
+            <label>Confirm Password</label>
+            <i class="bi"
+              [ngClass]="showConfirmPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"
+              (click)="showConfirmPassword = !showConfirmPassword"
+              style="position: absolute; top: 50%; right: 15px; transform: translateY(-50%); cursor: pointer;"></i>
+          </div>
+          @if (otpForm.get('confirmPassword')?.touched && otpForm.get('confirmPassword')?.invalid) {
+            <div class="text-danger small">Confirm Password is required.</div>
+          }
+          @if (otpForm.errors?.['mismatch'] && otpForm.get('confirmPassword')?.touched) {
+            <div class="text-danger small">Passwords do not match.</div>
+          }
+
+          <!-- Submit -->
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary w-100">Verify OTP & Register →</button>
+          </div>
+        </form>
+      }
+    </div>
+  </div>
+</div>
