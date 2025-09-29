@@ -1,86 +1,127 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+
 import { ToastrService } from 'ngx-toastr';
+import { CapitalizePipe } from '../../capitalize-pipe';
 import { Auth } from '../../shared/services/auth';
 
 @Component({
   selector: 'app-productlist',
-  imports: [RouterModule,CommonModule,FormsModule,InfiniteScrollModule],
+  imports: [RouterModule,CommonModule,ReactiveFormsModule,FormsModule, CapitalizePipe],
   templateUrl: './productlist.html',
   styleUrl: './productlist.css'
 })
 export class Productlist {
-  products: any[] = [];        // all products from backend
-  visibleProducts: any[] = []; // products currently shown
-  searchText: string = '';
-  loading: boolean = true;
+  products: any[] = [];
+  loading = true;
 
-  pageSize: number = 5;   // how many items to load per scroll
-  currentIndex: number = 0;
+  pageNumber = 1;
+  totalCount = 0;
+
+  pageSizeOptions = [5, 10, 15, 20, 50];
+
+  searchControl = new FormControl('');
+  pageSizeControl = new FormControl(5);
+  sortByControl = new FormControl('Name');
+  sortOrderControl = new FormControl('asc');
+
+  sortOrderOptions: { value: 'asc' | 'desc', label: string }[] = [];
 
   constructor(
     private auth: Auth,
-    private router: Router,
     private cd: ChangeDetectorRef,
     private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
-    this.auth.getProducts().subscribe({
-      next: (res) => {
-        this.products = Array.isArray(res) ? res : [];
-        this.loadMore(); // load first batch
-        this.loading = false;
-        this.cd.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error fetching products:', err);
-        this.loading = false;
-        this.cd.detectChanges();
-      }
+    this.updateSortOrderOptions();
+    this.loadProducts();
+
+    // React to search, sort, pageSize changes
+    this.searchControl.valueChanges.subscribe(() => {
+      this.pageNumber = 1;
+      this.loadProducts();
+    });
+
+    this.pageSizeControl.valueChanges.subscribe(() => {
+      this.pageNumber = 1;
+      this.loadProducts();
+    });
+
+    this.sortByControl.valueChanges.subscribe(() => {
+      this.updateSortOrderOptions();
+      this.loadProducts();
+    });
+
+    this.sortOrderControl.valueChanges.subscribe(() => {
+      this.loadProducts();
     });
   }
 
-  // Load next batch of items
-  loadMore(): void {
-    const nextIndex = this.currentIndex + this.pageSize;
-    const newItems = this.products.slice(this.currentIndex, nextIndex);
-    this.visibleProducts = [...this.visibleProducts, ...newItems];
-    this.currentIndex = nextIndex;
-  }
-
-  // Triggered when scrolled to bottom
-  onScroll(): void {
-    if (this.currentIndex < this.products.length) {
-      this.loadMore();
-
+  updateSortOrderOptions() {
+    const sortBy = this.sortByControl.value;
+    if (sortBy === 'Name') {
+      this.sortOrderOptions = [
+        { value: 'asc', label: 'A → Z' },
+        { value: 'desc', label: 'Z → A' }
+      ];
+    } else if (sortBy === 'Price') {
+      this.sortOrderOptions = [
+        { value: 'asc', label: 'Low → High' },
+        { value: 'desc', label: 'High → Low' }
+      ];
     }
+    // Default sort order
+    this.sortOrderControl.setValue(this.sortOrderOptions[0].value, { emitEvent: false });
   }
 
-  // Search filter applied on visible items
-  get filteredProducts(): any[] {
-    if (!this.searchText) return this.visibleProducts;
-    const text = this.searchText.toLowerCase();
-    return this.visibleProducts.filter(p =>
-      (p.Name && p.Name.toLowerCase().includes(text)) ||
-      (p.Description && p.Description.toLowerCase().includes(text))
-    );
-  }
-
-  // Add product to cart
-  addToCart(productId: number): void {
-    this.auth.addToCart({ productId, quantity: 1 }).subscribe({
-      next: () => {
-        this.toastr.success('Product added to cart!');
+  loadProducts(): void {
+    this.loading = true;
+    this.auth.getProducts({
+      search: this.searchControl.value || '',
+      pageNumber: this.pageNumber,
+      pageSize: Number(this.pageSizeControl.value),
+      sortBy: this.sortByControl.value!.toLowerCase(),    // <-- non-null assertion
+      sortOrder: this.sortOrderControl.value || 'asc'     // <-- fallback if null
+    }).subscribe({
+      next: (res: any) => {
+        this.products = res.Items.map((p: any) => ({
+          ...p,
+          ImageUrl: p.ImagePath ? this.getImageUrl(p.ImagePath) : 'assets/no-image.png'
+        }));
+        this.totalCount = res.TotalCount;
+        this.loading = false;
+        this.cd.detectChanges();
       },
       error: (err) => {
-        console.error('Error adding to cart:', err);
-        this.toastr.error('Failed to add product to cart.');
+        console.error(err);
+        this.loading = false;
+        this.cd.detectChanges();
       }
     });
   }
   
+
+  getImageUrl(path: string): string {
+    return `http://localhost:5294/${path}`;
+  }
+
+  changePage(page: number) {
+    if (page < 1 || page > this.totalPages) return;
+    this.pageNumber = page;
+    this.loadProducts();
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.totalCount / Number(this.pageSizeControl.value));
+  }
+
+  addToCart(productId: number): void {
+    this.auth.addToCart({ productId, quantity: 1 }).subscribe({
+      next: () => this.toastr.success('Product added to cart!'),
+      error: () => this.toastr.error('Failed to add product to cart.')
+    });
+  }
 }

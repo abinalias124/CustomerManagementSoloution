@@ -43,7 +43,7 @@ export class Register {
     this.otpForm = this.fb.group({
       otp: this.fb.array(Array(6).fill('').map(() => new FormControl('', [
         Validators.required,
-        Validators.pattern(/^[0-9]$/)   // ✅ Only digits allowed
+        Validators.pattern(/^[0-9]$/)   // Only digits allowed
       ]))),
       password: ['', [
         Validators.required,
@@ -65,7 +65,7 @@ export class Register {
       next: (res) => {
         this.toastr.success(res?.message || 'OTP sent');
         this.step = 2;
-        this.cd.detectChanges();   // ✅ Refresh UI after step change
+        this.cd.detectChanges();   // Refresh UI after step change
       },
       error: (err) => this.toastr.error(err.error?.message || 'Failed to send OTP')
     });

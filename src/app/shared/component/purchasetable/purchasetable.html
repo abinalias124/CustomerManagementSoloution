@@ -1,0 +1,78 @@
+<!-- Sorting & Rows Controls (existing date toggle + rows) -->
+@if (showSortControls) {
+  <div [formGroup]="filterForm" class="d-flex flex-wrap gap-3 align-items-center mb-3">
+
+    <!-- Date Sort Toggle (existing, unchanged for Purchasehistory) -->
+    <div class="d-flex align-items-center" *ngIf="useDateSort">
+      <label class="form-label me-2 mb-0">Date:</label>
+      <button type="button"
+              class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
+              (click)="toggleSortOrder()">
+        <i class="bi"
+           [class.bi-sort-down-alt]="filterForm.get('sortOrder')?.value === 'desc'"
+           [class.bi-sort-up-alt]="filterForm.get('sortOrder')?.value === 'asc'"></i>
+        <span>
+          {{ filterForm.get('sortOrder')?.value === 'desc' ? 'Oldest' : 'Recent' }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Optional Search box -->
+    <div *ngIf="enableSearch" class="flex-grow-1" style="max-width: 300px;">
+      <div class="input-group shadow-sm rounded-pill overflow-hidden">
+        <input type="text" class="form-control border-0"
+               placeholder="Search..."
+               formControlName="searchText">
+        <span class="input-group-text bg-primary text-white border-0">
+          <i class="bi bi-search"></i>
+        </span>
+      </div>
+    </div>
+
+    <!-- Optional Dropdown Sort (Name, Price etc.) -->
+    <div class="d-flex align-items-center gap-1" *ngIf="sortByOptions?.length">
+      <label class="form-label me-2 mb-0">Sort By:</label>
+      <select class="form-select form-select-sm w-auto" formControlName="sortBy">
+        <option *ngFor="let option of sortByOptions" [value]="option">{{ option }}</option>
+      </select>
+
+      <select class="form-select form-select-sm w-auto" formControlName="sortOrder">
+        <option *ngFor="let opt of sortOrderOptions" [value]="opt.value">{{ opt.label }}</option>
+      </select>
+    </div>
+
+    <!-- Rows per page -->
+    <div class="d-flex align-items-center">
+      <label class="form-label me-2 mb-0">Rows:</label>
+      <select class="form-select form-select-sm w-auto"
+              formControlName="pageSize"
+              (change)="onFilterChange()">
+        @for (option of pageSizeOptions; track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+    </div>
+  </div>
+}
+
+<!-- Table / Content Projection -->
+<div class="table-container">
+  <ng-content></ng-content>
+</div>
+
+<!-- Pagination -->
+<div class="pagination-footer d-flex justify-content-center align-items-center gap-3">
+  <button class="btn btn-outline-primary btn-sm rounded-circle"
+          [disabled]="pageNumber === 1"
+          (click)="changePage(pageNumber - 1)">
+    <i class="bi bi-chevron-left"></i>
+  </button>
+
+  <span class="text-primary">Page {{ pageNumber }} / {{ totalPages }}</span>
+
+  <button class="btn btn-outline-primary btn-sm rounded-circle"
+          [disabled]="pageNumber === totalPages"
+          (click)="changePage(pageNumber + 1)">
+    <i class="bi bi-chevron-right"></i>
+  </button>
+</div>

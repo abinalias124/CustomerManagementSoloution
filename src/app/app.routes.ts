@@ -39,6 +39,15 @@ export const routes: Routes = [
             canActivate: [authGuard, roleGuard],
             data: { role: 'admin' }
           },
+          {
+            path: 'approverequest',
+            loadComponent: () =>
+              import('./admin/approverequest/approverequest').then(
+                m => m.Approverequest
+              ),
+            canActivate: [authGuard, roleGuard],
+            data: { role: 'admin' }
+          },
         
           {
             path:'customerdashboard',
@@ -79,6 +88,15 @@ export const routes: Routes = [
                   loadComponent: () =>
                     import('./customer/purchasehistory/purchasehistory').then(
                       m => m.Purchasehistory
+                    ),
+                  canActivate: [authGuard, roleGuard],
+                  data: { role: 'customer' }
+                },
+                {
+                  path: 'customer/returnrequest',
+                  loadComponent: () =>
+                    import('./customer/returnrequest/returnrequest').then(
+                      m => m.Returnrequest
                     ),
                   canActivate: [authGuard, roleGuard],
                   data: { role: 'customer' }

@@ -33,8 +33,8 @@ export class Profilecompletion {
     // Check query params for edit mode
     this.route.queryParams.subscribe(params => {
       if (params['edit']) {
-        this.isEditMode = true;
-        this.loadUserProfile();
+        this.isEditMode = true;  // flag for template button text
+        this.loadUserProfile();  // fetch user data and pre-fill the form
       }
     });
   }
@@ -67,7 +67,7 @@ export class Profilecompletion {
             stateId: res.StateId,
             stateName: res.StateName,
             districtId: res.DistrictId,
-            districtName: res.DistrictName
+            districtName: res.DistrictName,
           });
           this.profileForm.get('pincode')?.setErrors(null);
         } else {
@@ -138,14 +138,16 @@ export class Profilecompletion {
   
     this.auth.completeProfile(payload).subscribe({
       next: (res: any) => {
-        this.toastr.success(res.message || 'Profile saved successfully!', 'Success');
+        this.toastr.success(res.message || (this.isEditMode ? 'Profile updated successfully!' : 'Profile saved successfully!'), 'Success');
   
-        //  Clear the form and dropdown after save (always)
-        this.profileForm.reset();
+        // Clear form and postOffices after success
+        // this.profileForm.reset();
         this.postOffices = [];
   
-        //  Reset edit mode flag if you want to go back to "new entry mode"
-        this.isEditMode = false;
+        if (!this.isEditMode) {
+          // First-time save → navigate to checkout
+          this.router.navigate(['/customer/viewproduct']);
+        }
   
         this.cdr.detectChanges();
       },
@@ -159,6 +161,8 @@ export class Profilecompletion {
       }
     });
   }
+  
+  
   
   
 }

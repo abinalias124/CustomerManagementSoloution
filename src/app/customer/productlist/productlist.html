@@ -1,78 +1,109 @@
-<div class="container mt-4"
-     style="height: 600px; overflow-y: auto;"
-     infiniteScroll
-     [infiniteScrollDistance]="2"
-     [infiniteScrollThrottle]="150"
-     [scrollWindow]="false"
-     (scrolled)="onScroll()">
+<div class="container mt-4">
+  <h2 class="mb-4 text-primary fw-bold">Available Products</h2>
 
-  <h2 class="mb-4">Available Products</h2>
+  <!-- Controls: Search + Rows + Sort -->
+  <div class="d-flex align-items-center gap-2 mb-4 flex-wrap">
 
-  <!-- Search Bar -->
-  <div class="mb-4">
-    <div class="input-group search-bar shadow-sm rounded-pill overflow-hidden">
-      <input type="text"
-             class="form-control border-0"
-             placeholder="Search products..."
-             [(ngModel)]="searchText">
-      <span class="input-group-text bg-primary text-white border-0">
-        <i class="bi bi-search"></i>
-      </span>
+    <!-- Search -->
+    <div class="flex-grow-1" style="max-width: 300px;">
+      <div class="input-group shadow-sm rounded-pill overflow-hidden">
+        <input type="text" class="form-control border-0" placeholder="Search products..."
+               [formControl]="searchControl">
+        <span class="input-group-text bg-primary text-white border-0">
+          <i class="bi bi-search"></i>
+        </span>
+      </div>
     </div>
+
+    <!-- Rows -->
+    <div class="d-flex align-items-center gap-1">
+      <label class="mb-0 fw-semibold">Rows:</label>
+      <select class="form-select form-select-sm shadow-sm" [formControl]="pageSizeControl">
+        @for (size of pageSizeOptions; track size) {
+          <option [value]="size">{{ size }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Sort Dropdown -->
+    <div class="d-flex align-items-center gap-1">
+      <label class="mb-0 fw-semibold">SortBy:</label>
+      <select class="form-select form-select-sm shadow-sm" [formControl]="sortByControl">
+        <option value="Name">Name</option>
+        <option value="Price">Price</option>
+      </select>
+
+      <select class="form-select form-select-sm shadow-sm" [formControl]="sortOrderControl">
+        @for (option of sortOrderOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+
   </div>
 
-  <!-- No products -->
-  @if (filteredProducts.length === 0 && !loading) {
-    <div class="text-center text-muted">
+  <!-- Loading Spinner -->
+  @if (loading) {
+    <div class="text-center my-3">
+      <div class="spinner-border text-primary"></div>
+    </div>
+  }
+
+  <!-- Products Grid -->
+  @if (!loading && products.length > 0) {
+    <div class="row g-3">
+      @for (product of products; track product.ProductId) {
+        <div class="col-lg-3 col-md-4 col-sm-6">
+          <div class="card h-100 shadow-sm rounded-3 position-relative">
+            <div class="p-2 image-container" [class.out-of-stock]="product.Stock === 0">
+              <img [src]="product.ImageUrl" class="card-img-top rounded-3" style="height:200px; object-fit:cover;">
+              @if (product.Stock === 0) {
+                <div class="overlay position-absolute top-0 start-0 w-100 h-100 d-flex
+                           align-items-center justify-content-center bg-dark bg-opacity-50 text-white fs-5">
+                  Out of Stock
+                </div>
+              }
+            </div>
+
+            <div class="card-body text-center">
+              <h6 class="fw-bold">{{ product.Name | capitalize }}</h6>
+              <p class="text-muted small mb-1">{{ product.Description }}</p>
+              <p class="fw-semibold text-success mb-0">{{ product.Price | currency:'INR' }}</p>
+            </div>
+
+            <div class="card-footer bg-transparent border-0 text-center pb-3">
+              <button class="btn btn-primary btn-sm" [disabled]="product.Stock === 0"
+                      (click)="addToCart(product.ProductId)">
+                Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- No Products -->
+  @if (!loading && products.length === 0) {
+    <div class="text-center text-muted mt-3">
       No products available
     </div>
   }
 
-  <!-- Product Cards Grid -->
-  <div class="row g-3">
-    @for (product of filteredProducts; track product) {
-      <div class="col-lg-3 col-md-4 col-sm-6">
-        <div class="card product-card shadow-sm border-0 rounded-3 h-100 position-relative">
+  <!-- Pagination -->
+  <div class="pagination-footer d-flex justify-content-center align-items-center gap-3 mt-3">
+    <button class="btn btn-outline-primary btn-sm rounded-circle" 
+            (click)="changePage(pageNumber - 1)" 
+            [disabled]="pageNumber === 1">
+      <i class="bi bi-chevron-left"></i>
+    </button>
   
-          <!-- Product Image + Overlay -->
-          <div class="p-3 image-container" [class.out-of-stock]="product.Stock === 0 || product.stock === 0">
-            <img [src]="product.ImageUrl || 'assets/no-image.png'"
-                 alt="Product"
-                 class="card-img-top rounded-3 product-img">
+    <span class="text-primary">Page {{ pageNumber }} / {{ totalPages }}</span>
   
-            <!-- Out of Stock Overlay -->
-            <div *ngIf="product.Stock === 0 || product.stock === 0" class="overlay">
-              Out of Stock
-            </div>
-          </div>
-  
-          <!-- Product Details -->
-          <div class="card-body text-center p-3">
-            <h6 class="card-title fw-bold text-dark mb-1">{{ product.Name }}</h6>
-            <p class="card-text text-muted small mb-2">{{ product.Description }}</p>
-            <p class="fw-semibold text-success mb-2">
-              {{ product.Price | currency:'INR' }}
-            </p>
-          </div>
-  
-          <!-- Card Footer -->
-          <div class="card-footer bg-transparent border-0 text-center pb-3">
-            <button class="btn btn-primary btn-sm"
-                    (click)="addToCart(product.ProductId)"
-                    [disabled]="product.Stock === 0 || product.stock === 0">
-              Add to Cart
-            </button>
-          </div>
-        </div>
-      </div>
-    }
+    <button class="btn btn-outline-primary btn-sm rounded-circle" 
+            (click)="changePage(pageNumber + 1)" 
+            [disabled]="pageNumber === totalPages">
+      <i class="bi bi-chevron-right"></i>
+    </button>
   </div>
-  
-
-  <!-- Loading Spinner -->
-  @if (loading) {
-    <div class="text-center mt-3">
-      <div class="spinner-border text-primary"></div>
-    </div>
-  }
 </div>

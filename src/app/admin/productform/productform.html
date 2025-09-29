@@ -1,55 +1,134 @@
 <div class="container mt-4">
-
-  <!-- Header -->
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h2>Product Management</h2>
-    <button class="btn btn-success" (click)="openModal()">
-      <i class="bi bi-plus-circle"></i> Add Product
-    </button>
   </div>
 
-  <!-- Products Table -->
-  <table class="table table-striped table-bordered shadow-sm align-middle">
-    <thead class="table-dark">
-      <tr>
-        <th>Image</th>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Price</th>
-        <th>Stock</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      @if (products.length === 0) {
+  <!-- Search + Page Size + Sorting Dropdown + Add Button -->
+  <div class="row mb-3 align-items-center">
+    <div class="col-md-9 d-flex gap-2 mb-3">
+      <!-- Search -->
+      <input type="text"
+             class="form-control"
+             placeholder="Search by name"
+             [formControl]="searchControl">
+
+      <!-- Page Size Dropdown -->
+      <div class="d-flex align-items-center me-3">
+        <label class="me-2 fw-semibold mb-0">Rows:</label>
+        <select class="form-select form-select-sm w-auto" [formControl]="pageSizeControl">
+          @for (size of pageSizeOptions; track size) {
+            <option [value]="size">{{ size }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Sorting Dropdown -->
+      <div class="d-flex align-items-center me-3">
+        <label class="me-2 fw-semibold mb-0">SortBy:</label>
+        <select class="form-select form-select-sm w-auto"
+                [formControl]="sortByControl"
+                (change)="onSortByChange()">
+          @for (option of ['Name', 'Price']; track option) {
+            <option [value]="option">{{ option }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Sort Order Dropdown -->
+      <div class="d-flex align-items-center">
+        <label class="me-2 fw-semibold mb-0">Order:</label>
+        <select class="form-select form-select-sm w-auto"
+                [formControl]="sortOrderControl"
+                (change)="onSortChange()">
+          @for (option of sortOrderOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- Add Button aligned to right -->
+    <div class="col-md-3 d-flex justify-content-end">
+      <button class="btn btn-success" (click)="openModal()">
+        <i class="bi bi-plus-circle"></i> Add Product
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-responsive shadow-sm rounded">
+    <table class="table table-striped table-bordered table-hover align-middle mb-0 text-start">
+      <thead class="table-primary text-uppercase small">
         <tr>
-          <td colspan="6" class="text-center text-muted">No products available</td>
+          <th scope="col">Image</th>
+          <th scope="col">Name</th>
+          <th scope="col">Description</th>
+          <th scope="col">Price</th>
+          <th scope="col">Stock</th>
+          <th scope="col">Actions</th>
         </tr>
-      }
-      @for (product of products; track product) {
-        <tr>
-          <td>
-            @if (product.ImageUrl) {
-              <img [src]="product.ImageUrl" alt="Product" class="img-thumbnail" style="max-height: 80px;">
-            }
-          </td>
-          <td>{{ product.Name }}</td>
-          <td>{{ product.Description }}</td>
-          <td>{{ product.Price | currency:'INR' }}</td>
-          <td>{{ product.Stock }}</td>
-          <td>
-            <button class="btn btn-sm btn-warning me-2" (click)="openModal(product)">
-              <i class="bi bi-pencil-square"></i> Edit
-            </button>
-            <button class="btn btn-sm btn-danger" (click)="deleteProduct(product)">
-              <i class="bi bi-trash"></i> Delete
-            </button>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        @if (products.length === 0 && searchControl.value) {
+          <tr>
+            <td colspan="6" class="text-center text-muted">No match found</td>
+          </tr>
+        } @else if (products.length === 0) {
+          <tr>
+            <td colspan="6" class="text-center text-muted">No products available</td>
+          </tr>
+        }
+        @for (product of products; track product.ProductId) {
+          <tr>
+            <td>
+              @if (product.ImageUrl) {
+                <img [src]="product.ImageUrl" class="img-thumbnail rounded" style="max-height: 80px; max-width: 80px;">
+              }
+            </td>
+            <td>{{ product.Name | capitalize }}</td>
+            <td>{{ product.Description }}</td>
+            <td>{{ product.Price | currency:'INR' }}</td>
+            <td>{{ product.Stock }}</td>
+            <td class="d-flex gap-2 align-items-center mt-4">
+              <button class="btn btn-sm btn-warning" (click)="openModal(product)">
+                <i class="bi bi-pencil-square"></i> Edit
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="deleteProduct(product)">
+                <i class="bi bi-trash"></i> Delete
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+<!-- Pagination: show only if totalCount > pageSize -->
+<div class="pagination-footer d-flex justify-content-center align-items-center gap-3 mt-3"
+     *ngIf="totalCount > pageSize">
+  
+  <!-- Previous Button -->
+  <button class="btn btn-outline-primary btn-sm rounded-circle"
+          (click)="changePage(pageNumber - 1)"
+          [disabled]="pageNumber === 1">
+    <i class="bi bi-chevron-left"></i>
+  </button>
+
+  <!-- Current Page Display -->
+  <span class="text-primary fw-semibold">
+    Page {{ pageNumber }} / {{ totalPages }}
+  </span>
+
+  <!-- Next Button -->
+  <button class="btn btn-outline-primary btn-sm rounded-circle"
+          (click)="changePage(pageNumber + 1)"
+          [disabled]="pageNumber === totalPages">
+    <i class="bi bi-chevron-right"></i>
+  </button>
 </div>
+
+  
+
 
 <!-- Modal -->
 <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
@@ -68,14 +147,11 @@
             </div>
             <div class="col-md-6">
               <label class="form-label">Price</label>
-              <input type="number" class="form-control" formControlName="price">
+              <input type="text" class="form-control" formControlName="price" appOnlyNumber>
             </div>
-          </div>
-
-          <div class="row mb-2">
             <div class="col-md-6">
               <label class="form-label">Stock</label>
-              <input type="number" class="form-control" formControlName="stock">
+              <input type="text" class="form-control" formControlName="stock" appOnlyNumber>
             </div>
             <div class="col-md-6">
               <label class="form-label">Image</label>
@@ -94,13 +170,14 @@
               <img [src]="previewUrl" class="img-thumbnail" style="max-height: 150px;">
             </div>
           }
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+              {{ editingProduct ? 'Update' : 'Add' }}
+            </button>
+          </div>
         </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
-        <button type="submit" class="btn btn-primary" (click)="submitForm()">
-          {{ editingProduct ? 'Update' : 'Add' }}
-        </button>
       </div>
     </div>
   </div>

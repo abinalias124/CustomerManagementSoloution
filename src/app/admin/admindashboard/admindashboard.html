@@ -1,1 +1,100 @@
-<p>admindashboard works!</p>
+@if (data) {
+  <div class="container mt-4">
+    <h2 class="mb-4 text-primary fw-bold text-center">Admin Dashboard</h2>
+
+
+    <div class="row mb-4 g-3 align-items-center">
+      <!-- Doughnut Chart -->
+      <div class="col-md-4">
+        <div class="card shadow-sm border-0 rounded-3 h-100">
+          <div class="card-body text-center">
+            <h6 class="fw-bold mb-3">Customers by Badge</h6>
+            <canvas baseChart 
+              [data]="badgeChartData"
+              [type]="'doughnut'"
+              [options]="doughnutOptions"
+              style="max-height: 250px; max-width: 250px; margin: auto;">
+            </canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Cards (Right) -->
+      <div class="col-md-8">
+        <div class="row g-3">
+          <div class="col-md-3" *ngFor="let card of summaryCards">
+            <div class="card text-center shadow-sm border-0 rounded-3 h-100">
+              <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                <i class="{{card.icon}} fs-2 mb-2 text-secondary"></i>
+                <h6 class="text-muted">{{ card.title }}</h6>
+                <h4 class="fw-bold text-primary">{{ card.value }}</h4>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Purchases & Revenue Trends -->
+    <div class="row mb-4 g-3">
+      <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-3 h-100">
+          <div class="card-body text-center">
+            <h6 class="fw-bold mb-3">Purchases (Today / Week / Month)</h6>
+            <canvas baseChart 
+              [data]="purchaseTrendsData"
+              [type]="'bar'"
+              [options]="barOptions"
+              style="max-height: 300px;">
+            </canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-3 h-100">
+          <div class="card-body text-center">
+            <h6 class="fw-bold mb-3">Revenue vs Refunds</h6>
+            <canvas baseChart 
+              [data]="revenueRefundChartData"
+              [type]="'bar'"
+              [options]="barOptions"
+              style="max-height: 300px;">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Customers & Products -->
+    <div class="row mb-4 g-3">
+      <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-3 h-100">
+          <div class="card-body text-center">
+            <h6 class="fw-bold mb-3">Top Customers by Spend</h6>
+            <canvas baseChart 
+              [data]="topCustomersChartData"
+              [type]="'bar'"
+              [options]="horizontalBarOptions"
+              style="max-height: 300px;">
+            </canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card shadow-sm border-0 rounded-3 h-100">
+          <div class="card-body text-center">
+            <h6 class="fw-bold mb-3">Top Selling Products</h6>
+            <canvas baseChart 
+              [data]="topProductsChartData"
+              [type]="'bar'"
+              [options]="horizontalBarOptions"
+              style="max-height: 300px;">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

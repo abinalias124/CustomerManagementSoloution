@@ -1,7 +1,22 @@
-header {
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  a {
-    text-decoration: none;
-  }
+/* Header styling */
+.header {
+  background-color: #0a2342; /* Same navy blue as sidebar */
+  color: #ffffff;
+  border-bottom: 2px solid #0d305a;
+}
+
+/* Logout button */
+.header .logout-btn {
+  border-color: #1e90ff; /* Outline matches hover color */
+  color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.header .logout-btn:hover {
+  background-color: #1e90ff; /* Dodger blue hover */
+  color: #fff;
+  border-color: #1e90ff;
+  box-shadow: 0 0 6px rgba(30, 144, 255, 0.6);
+}
+
   

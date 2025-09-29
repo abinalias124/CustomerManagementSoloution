@@ -1,4 +1,3 @@
-
 <div class="container py-4">
   <div class="card shadow-lg border-0 rounded-4 p-4">
     <h4 class="fw-bold text-primary mb-3 text-center">Complete Your Profile</h4>
@@ -9,13 +8,14 @@
         <!-- Full Name -->
         <div class="col-md-6">
           <div class="form-floating">
-            <input type="text" class="form-control" formControlName="fullName" placeholder="Full Name">
+            <input type="text" class="form-control" formControlName="fullName" placeholder="Full Name" maxlength="150">
             <label>Full Name</label>
           </div>
-          <div *ngIf="profileForm.get('fullName')?.touched && profileForm.get('fullName')?.invalid"
-               class="text-danger small">
-            Full name is required (max 150 chars).
-          </div>
+          @if (profileForm.get('fullName')?.touched && profileForm.get('fullName')?.invalid) {
+            <div class="text-danger small">
+              Full name is required (max 150 chars).
+            </div>
+          }
         </div>
 
         <!-- Date of Birth -->
@@ -28,12 +28,13 @@
                    [max]="today">
             <label>Date of Birth</label>
           </div>
-          <div *ngIf="profileForm.get('dateOfBirth')?.touched && profileForm.get('dateOfBirth')?.invalid"
-               class="text-danger small">
-            <div *ngIf="profileForm.get('dateOfBirth')?.errors?.['required']">
-              Date of Birth is required.
+          @if (profileForm.get('dateOfBirth')?.touched && profileForm.get('dateOfBirth')?.invalid) {
+            <div class="text-danger small">
+              @if (profileForm.get('dateOfBirth')?.errors?.['required']) {
+                <div>Date of Birth is required.</div>
+              }
             </div>
-          </div>
+          }
         </div>
 
         <!-- Gender -->
@@ -63,26 +64,31 @@
                    formControlName="phoneNumber"
                    placeholder="Phone Number"
                    maxlength="10">
-                
             <label>Phone Number</label>
           </div>
-          <div *ngIf="profileForm.get('phoneNumber')?.touched && profileForm.get('phoneNumber')?.invalid"
-               class="text-danger small mt-1">
-            <div *ngIf="profileForm.get('phoneNumber')?.errors?.['required']">Phone number is required</div>
-            <div *ngIf="profileForm.get('phoneNumber')?.errors?.['pattern']">Invalid Indian phone number</div>
-          </div>
+          @if (profileForm.get('phoneNumber')?.touched && profileForm.get('phoneNumber')?.invalid) {
+            <div class="text-danger small mt-1">
+              @if (profileForm.get('phoneNumber')?.errors?.['required']) {
+                <div>Phone number is required</div>
+              }
+              @if (profileForm.get('phoneNumber')?.errors?.['pattern']) {
+                <div>Invalid Indian phone number</div>
+              }
+            </div>
+          }
         </div>
 
         <!-- Address -->
         <div class="col-md-12">
           <div class="form-floating">
-            <textarea class="form-control" formControlName="address" placeholder="Address" style="height:100px"></textarea>
+            <textarea class="form-control" formControlName="address" placeholder="Address" style="height:100px" maxlength="150"></textarea>
             <label>Address</label>
           </div>
-          <div *ngIf="profileForm.get('address')?.touched && profileForm.get('address')?.invalid"
-               class="text-danger small">
-            Address is required (max 300 chars).
-          </div>
+          @if (profileForm.get('address')?.touched && profileForm.get('address')?.invalid) {
+            <div class="text-danger small">
+              Address is required (max 150 chars).
+            </div>
+          }
         </div>
 
         <!-- Pincode -->
@@ -94,15 +100,21 @@
                    placeholder="Pincode"
                    maxlength="6"
                    (input)="onPincodeChange($event.target.value)">
-                  
             <label>Pincode</label>
           </div>
-          <div *ngIf="profileForm.get('pincode')?.touched && profileForm.get('pincode')?.invalid"
-               class="text-danger small mt-1">
-            <div *ngIf="profileForm.get('pincode')?.errors?.['required']">Pincode is required</div>
-            <div *ngIf="profileForm.get('pincode')?.errors?.['pattern']">Pincode must be 6 digits</div>
-            <div *ngIf="profileForm.get('pincode')?.errors?.['notFound']">Pincode not found</div>
-          </div>
+          @if (profileForm.get('pincode')?.touched && profileForm.get('pincode')?.invalid) {
+            <div class="text-danger small mt-1">
+              @if (profileForm.get('pincode')?.errors?.['required']) {
+                <div>Pincode is required</div>
+              }
+              @if (profileForm.get('pincode')?.errors?.['pattern']) {
+                <div>Pincode must be 6 digits</div>
+              }
+              @if (profileForm.get('pincode')?.errors?.['notFound']) {
+                <div>Pincode not found</div>
+              }
+            </div>
+          }
         </div>
 
         <!-- State -->
@@ -126,22 +138,28 @@
           <div class="form-floating">
             <select class="form-select" formControlName="postOfficeId">
               <option value="">Select</option>
-              <option *ngFor="let po of postOffices" [value]="po.Id">{{ po.Name }}</option>
+              @for (po of postOffices; track po.Id) {
+                <option [value]="po.Id">{{ po.Name }}</option>
+              }
             </select>
             <label>Post Office</label>
           </div>
-          <div *ngIf="profileForm.get('postOfficeId')?.touched && profileForm.get('postOfficeId')?.invalid"
-               class="text-danger small">
-            Post Office is required.
-          </div>
+          @if (profileForm.get('postOfficeId')?.touched && profileForm.get('postOfficeId')?.invalid) {
+            <div class="text-danger small">
+              Post Office is required.
+            </div>
+          }
         </div>
 
       </div>
       <!-- Save Button -->
       <div class="text-end mt-4">
-        <button type="submit" class="btn btn-primary btn-sm px-4 rounded-pill p-2 shadow-sm" [disabled]="loading">
+        <button type="submit" 
+                class="btn btn-primary btn-sm px-4 rounded-pill p-2 shadow-sm" 
+                [disabled]="loading">
           <i class="bi" [ngClass]="loading ? 'bi-hourglass-split' : 'bi-check-circle'"></i>
-          {{ isEditMode ? (loading ? 'Updating...' : 'Update Profile') : (loading ? 'Saving...' : 'Save & Continue') }}
+          {{ isEditMode ? (loading ? 'Updating...' : 'Update Profile') 
+                        : (loading ? 'Saving...' : 'Save & Continue') }}
         </button>
       </div>
     </form>

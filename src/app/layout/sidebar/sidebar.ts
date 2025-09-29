@@ -1,45 +1,38 @@
 
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
+
 interface NavItem {
   label: string;
   link: string;
+  queryParams?: any;
 }
+      // optional query params
+
 @Component({
   selector: 'app-sidebar',
-  imports: [RouterModule],
+  imports: [RouterModule,CommonModule],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css'
 })
 export class Sidebar {
-  role: string | null = localStorage.getItem('role'); // Admin or Customer
-
   navItems: NavItem[] = [];
 
   constructor() {
-    this.setNavItems();
+    this.loadMenus();
   }
 
-  setNavItems() {
-    if (!this.role) return;
-
-    const roleLower = this.role.trim().toLowerCase();
-
-    if (roleLower === 'admin') {
-      this.navItems = [
-        { label: 'Admin Dashboard', link: '/dashboard' },
-        { label: 'Request Approvals', link: '/request-approvals' },
-        { label: 'Customers', link: '/customermanagement' },
-        { label: 'Product Management', link: '/productform' },
-        { label: 'Reports', link: '/reports' }
-      ];
-    } else if (roleLower === 'customer') {
-      this.navItems = [
-        { label: 'Customer Dashboard', link: '/customerdashboard' },
-        { label: ' Product List', link: '/customer/products' },
-        { label: 'Cart', link: '/customer/viewproduct' },
-        { label: 'Purchase History', link: '/customer/purchasehistory' }
-      ];
-    }
+  loadMenus() {
+    const menusJson = localStorage.getItem('menus');
+    if (!menusJson) return;
+  
+    const menus = JSON.parse(menusJson);
+  
+    this.navItems = menus.map((m: any) => ({
+      label: m.Name,
+      link: m.Path,
+      queryParams: m.Path.includes('profilecompletion') ? { edit: true } : null
+    }));
   }
 }

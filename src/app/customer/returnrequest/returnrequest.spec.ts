@@ -5,15 +5,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideToastr } from 'ngx-toastr';
 
-import { Profilecompletion } from './profilecompletion';
+import { Returnrequest } from './returnrequest';
 
-describe('Profilecompletion', () => {
-  let component: Profilecompletion;
-  let fixture: ComponentFixture<Profilecompletion>;
+describe('Returnrequest', () => {
+  let component: Returnrequest;
+  let fixture: ComponentFixture<Returnrequest>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Profilecompletion],
+      imports: [Returnrequest],
       providers:[
         provideZonelessChangeDetection(),
         provideHttpClient(),
@@ -24,7 +24,7 @@ describe('Profilecompletion', () => {
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Profilecompletion);
+    fixture = TestBed.createComponent(Returnrequest);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

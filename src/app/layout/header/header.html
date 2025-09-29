@@ -1,13 +1,20 @@
-<header class="bg-primary text-white p-3 d-flex justify-content-between align-items-center">
+<header class="header d-flex justify-content-between align-items-center p-3 text-white">
+  <!-- Dashboard Title -->
   <h4 class="mb-0">CMS Dashboard</h4>
-  
-  <div class="dropdown">
-    <button class="btn btn-light dropdown-toggle" type="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-      <i class="bi bi-person-circle"></i>
+
+  <!-- Right side: Welcome + Logout -->
+  <div class="d-flex align-items-center gap-3">
+    <!-- Welcome Username with Hand Icon -->
+    <span class="d-flex align-items-center gap-2 px-3 py-1 rounded-3 bg-white bg-opacity-10 fw-semibold">
+     
+      <span>Welcome, {{ email }}</span>
+    </span>
+
+    <!-- Rectangular Logout Button -->
+    <button 
+      class="btn btn-outline-light btn-sm d-flex align-items-center gap-1"
+      (click)="logout()">
+      <i class="bi bi-box-arrow-right"></i> Logout
     </button>
-    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-      <li><a class="dropdown-item" (click)="goToProfile()">Edit Info</a></li>
-      <li><a class="dropdown-item" (click)="logout()">Logout</a></li>
-    </ul>
   </div>
 </header>

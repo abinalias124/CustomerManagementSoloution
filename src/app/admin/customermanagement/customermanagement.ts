@@ -1,78 +1,58 @@
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Purchasetable } from '../../shared/component/purchasetable/purchasetable';
 import { Auth } from '../../shared/services/auth';
 
 @Component({
   selector: 'app-customermanagement',
-  imports: [CommonModule,ReactiveFormsModule],
+  imports: [CommonModule,ReactiveFormsModule,Purchasetable],
   templateUrl: './customermanagement.html',
   styleUrl: './customermanagement.css'
 })
 export class Customermanagement {
   purchases: any[] = [];
-  pageNumber: number = 1;
-  pageSize: number = 5;
-  totalCount: number = 0;
+  pageNumber = 1;
+  pageSize = 10;
+  totalCount = 0;
+  loading = true;
 
-  filterForm!: FormGroup;
+  constructor(private auth: Auth, private cd: ChangeDetectorRef) {}
 
-  constructor(
-    private authService: Auth,
-    private fb: FormBuilder,
-    private cd: ChangeDetectorRef
-  ) {}
-
-  ngOnInit(): void {
-    this.filterForm = this.fb.group({
-      sortBy: ['date'],
-      sortOrder: ['asc']
-    });
-
+  ngOnInit() {
     this.loadPurchases();
-
-    // reload when sort changes
-    this.filterForm.valueChanges.subscribe(() => {
-      this.pageNumber = 1;
-      this.loadPurchases();
-    });
   }
 
-  loadPurchases() {
-    const { sortBy, sortOrder } = this.filterForm.value;
-
+  loadPurchases(filters?: any) {
     const params = {
       pageNumber: this.pageNumber,
-      pageSize: this.pageSize,
-      sortBy,
-      sortOrder
+      pageSize: filters?.pageSize || this.pageSize,
+      sortBy: filters?.sortBy || 'date',
+      sortOrder: filters?.sortOrder || 'asc'
     };
 
-    this.authService.getAllPurchases(params).subscribe({
-      next: (res) => {
-        this.purchases = res.items ?? res.Items ?? [];
-        this.totalCount = res.totalCount ?? res.TotalCount ?? 0;
-        this.cd.detectChanges();
-      },
-      error: (err) => console.error('Error loading purchases:', err)
+    this.pageSize = params.pageSize;
+
+    this.auth.getAllPurchases(params).subscribe(res => {
+      
+      this.purchases = (res.Items ?? []).map((p: any) => ({
+        ...p,
+        CreatedAt: new Date(p.CreatedAt + 'Z') // treat as UTC, convert to local
+      }));
+
+      this.totalCount = res.TotalCount ?? 0;
+      this.loading = false;
+      this.cd.detectChanges();
     });
   }
 
-  prevPage() {
-    if (this.pageNumber > 1) {
-      this.pageNumber--;
-      this.loadPurchases();
-    }
+  onFilterChange(filters: any) {
+    this.pageNumber = 1;
+    this.loadPurchases(filters);
   }
 
-  nextPage() {
-    if (this.pageNumber < this.totalPages) {
-      this.pageNumber++;
-      this.loadPurchases();
-    }
-  }
-
-  get totalPages(): number {
-    return Math.ceil(this.totalCount / this.pageSize) || 1;
+  onPageChange(page: number) {
+    this.pageNumber = page;
+    this.loadPurchases();
   }
 }

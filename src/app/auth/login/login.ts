@@ -42,38 +42,39 @@ togglePassword() {
   this.showPassword = !this.showPassword;
 }
 
-  onLogin() {
-    if (this.loginForm.invalid) {
-      
-      this.toastr.warning('Email and password are required!');
-      return;
-    }
-    console.log(this.loginForm.value);
-
-    this.auth.login(this.loginForm.value).subscribe({
-      next: (res: any) => {
-  
-        
-        localStorage.setItem('token', res.Token);
-        localStorage.setItem('role', res.Role); 
-        localStorage.setItem('userId', res.UserId);
-        localStorage.setItem('email', res.Email);
-
-        const role = res.Role.trim().toLowerCase();
-        this.toastr.success('Login successful!', 'Welcome');
-
-      
-        if (role === 'admin') {
-          this.router.navigate(['/dashboard']); 
-        } else if (role === 'customer') {
-          this.router.navigate(['/customerdashboard']);
-        } else {
-          this.toastr.error('Unknown role! Cannot navigate.');
-        }
-      },
-      error: (err) => {
-        this.toastr.error('Invalid username or password!', 'Login Failed');
-      }
-    });
+onLogin() {
+  if (this.loginForm.invalid) {
+    this.toastr.warning('Email and password are required!');
+    return;
   }
+
+  console.log(this.loginForm.value);
+
+  this.auth.login(this.loginForm.value).subscribe({
+    next: (res: any) => {
+      // Successful login
+      localStorage.setItem('token', res.Token);
+      localStorage.setItem('role', res.Role); 
+      localStorage.setItem('userId', res.UserId);
+      localStorage.setItem('email', res.Email);
+      localStorage.setItem('menus', JSON.stringify(res.Menus)); 
+
+      const role = res.Role.trim().toLowerCase();
+      if (role === 'admin') {
+        this.router.navigate(['/dashboard']); 
+      } else {
+        this.router.navigate(['/customerdashboard']);
+      }
+    },
+    error: (err: any) => {
+      // Handle errors here
+      if (err?.error?.message) {
+        this.toastr.error(err.error.message); // show backend message
+      } else {
+        this.toastr.error('Login failed. Please try again.');
+      }
+    }
+  });
+}
+
 }

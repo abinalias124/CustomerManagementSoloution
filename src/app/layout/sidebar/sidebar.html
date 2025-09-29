@@ -1,9 +1,12 @@
-<aside class="sidebar bg-light p-3 vh-100">
-  <ul class="nav flex-column">
-    @for (item of navItems; track item) {
-      <li class="nav-item mb-2">
-        <a class="nav-link" [routerLink]="item.link">{{ item.label }}</a>
-      </li>
-    }
-  </ul>
+<aside class="sidebar p-3 vh-100">
+  <nav>
+    <a *ngFor="let item of navItems"
+       class="nav-link"
+       [routerLink]="item.link"
+       [queryParams]="item.queryParams || null"
+       routerLinkActive="active"
+      >
+      {{ item.label }}
+    </a>
+  </nav>
 </aside>

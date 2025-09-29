@@ -1,124 +1,131 @@
-<div class="container py-4">
-    <h2 class="mb-4 text-center">🛒 My Purchase History</h2>
-  
-    <!-- Filters and Sorting -->
-    <div class="row mb-3" [formGroup]="filterForm">
-        <!-- Page Size Selector -->
-        <div class="col-md-3">
-          <label for="pageSize" class="form-label">Rows per page:</label>
-          <select id="pageSize" class="form-select" formControlName="pageSize">
-            <option *ngFor="let option of pageSizeOptions" [value]="option">{{ option }}</option>
-          </select>
-        </div>
-      
-        <div class="col-md-4">
-            <label class="form-label">Sort by:</label>
-            <div class="d-flex gap-2">
-              <select class="form-select" formControlName="sortBy">
-                <option value="CreatedAt">Date</option>
-               
-              </select>
-              <button class="btn btn-outline-secondary" (click)="toggleSortOrder()" 
-                      [title]="filterForm.get('sortOrder')?.value === 'asc' ? 'Ascending' : 'Descending'">
-                <i class="bi" [ngClass]="getSortIcon(filterForm.get('sortBy')?.value)"></i>
-              </button>
-            </div>
-          </div>
-        
-          <!-- Hidden field for sortOrder -->
-          <input type="hidden" formControlName="sortOrder">
-        </div>
-  
-    <!-- Loading -->
-    <div *ngIf="loading" class="text-center my-5">
-      <div class="spinner-border text-primary"></div>
-      <p>Loading purchases...</p>
-    </div>
-  
-    <!-- Table -->
-    <div *ngIf="!loading && purchases.length > 0" class="table-responsive shadow-sm rounded">
-      <table class="table table-hover align-middle">
-        <thead class="table-primary">
+<div class="container mt-4">
+  <h3 class="fw-bold mb-4 text-primary">Purchase History</h3>
+
+  <app-purchasetable [pageNumber]="pageNumber" [pageSize]="pageSize" [totalCount]="totalCount"
+    (filterChange)="onFilterChange($event)" (pageChange)="onPageChange($event)">
+
+    <div class="table-responsive shadow-sm rounded mb-4">
+      <table class="table table-striped table-bordered table-hover align-middle mb-0">
+        <thead class="table-primary text-uppercase small text-start">
           <tr>
-            <th></th>
-            <th>#</th>
-            <th>Net Total</th>
-            <th>
-              Date 
-              <i class="bi ms-1" 
-                 [ngClass]="getSortIcon('CreatedAt')"
-                 *ngIf="filterForm.get('sortBy')?.value === 'CreatedAt'"></i>
-            </th>
+            <th scope="col">Sl No</th>
+            <th scope="col">Products</th>
+            <th scope="col">Date</th>
+            <th class="text-start">Net Amount</th>
+            <th class="text-center">Action</th>
           </tr>
         </thead>
-        <tbody>
-          <ng-container *ngFor="let purchase of purchases; let i = index">
-            <tr (click)="toggleExpand(purchase)" style="cursor: pointer;">
-              <td><i class="bi" [ngClass]="purchase.expanded ? 'bi-dash-circle' : 'bi-plus-circle'"></i></td>
-              <td>{{ (pageNumber - 1) * pageSize + (i + 1) }}</td>
-              <td>{{ purchase.NetTotal | currency:'INR' }}</td>
-              <td>{{ purchase.CreatedAt | date:'medium' }}</td>
+        <tbody class="text-start">
+          @for (purchase of purchases; track purchase.PurchaseId; let i = $index) {
+            <tr (click)="showPurchaseDetails(purchase)" class="clickable-row cursor-pointer">
+              <td>{{ (pageNumber - 1) * pageSize + i + 1 }}</td>
+              <td>
+                <span class="fw-semibold">{{ purchase.Items[0]?.ProductName | capitalize }}</span>
+                @if (purchase.Items.length > 1) {
+                  <span class="badge bg-secondary ms-2 small">
+                    + {{ purchase.Items.length - 1 }} more
+                  </span>
+                }
+              </td>
+              <td>{{ purchase.CreatedAt | date:'short' }}</td>
+              <td class="fw-bold text-success">{{ purchase.NetTotal | currency:'INR' }}</td>
+              <td class="text-center">
+                <span class="badge bg-primary fw-semibold small">Return Request</span>
+              </td>
             </tr>
-  
-           <!-- Expanded Products -->
-<tr *ngIf="purchase.expanded">
-  <td></td>
-  <td colspan="4">
-    <div class="p-3 bg-light rounded shadow-sm product-details-container">
-      <h6 class="product-details-title"> Products in this Purchase</h6>
-      <div class="table-responsive">
-        <table class="table table-sm table-bordered mt-2 product-details-table">
-          <thead class="table-secondary">
-            <tr>
-              <th>#</th>
-              <th>Product Name</th>
-              <th>Quantity</th>
-              <th>Price</th>
-              <th>Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of purchase.Items; let j = index" class="product-row">
-              <td>{{ j + 1 }}</td>
-              <td class="product-name">{{ item.ProductName }}</td>
-              <td>{{ item.Quantity }}</td>
-              <td>{{ item.UnitPrice | currency:'INR' }}</td>
-              <td class="subtotal">{{ item.Quantity * item.UnitPrice | currency:'INR' }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </td>
-</tr>
-          </ng-container>
+          }
         </tbody>
       </table>
     </div>
-  
-    
-    <!-- Custom Pagination with Arrows -->
-<div *ngIf="!loading && totalCount > pageSize" class="d-flex justify-content-center align-items-center gap-3 mt-3">
-    <button class="btn btn-outline-primary" 
-            [disabled]="pageNumber === 1" 
-            (click)="pageChanged(pageNumber - 1)"
-            title="Previous Page">
-      <i class="bi bi-arrow-left"></i>
-    </button>
-  
-    <span class="fw-bold">Page {{ pageNumber }} of {{ totalPages }}</span>
-  
-    <button class="btn btn-outline-primary" 
-            [disabled]="pageNumber === totalPages" 
-            (click)="pageChanged(pageNumber + 1)"
-            title="Next Page">
-      <i class="bi bi-arrow-right"></i>
-    </button>
-  </div>
-  
-  
-    <!-- No purchases -->
-    <div *ngIf="!loading && purchases.length === 0" class="alert alert-info text-center">
-      No purchases found.
+  </app-purchasetable>
+
+  <!-- Modal -->
+  <div class="modal fade" id="purchaseDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Purchase Details</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        @if (selectedPurchase) {
+          <div class="modal-body">
+            <!-- Summary -->
+            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+              <div class="text-start">
+                <p class="mb-1"><strong>Purchase ID:</strong> {{ selectedPurchase.PurchaseId }}</p>
+                <p class="mb-0"><strong>Date:</strong> {{ selectedPurchase.CreatedAt | date:'medium' }}</p>
+              </div>
+              <div class="text-end">
+                <p class="mb-0 fw-bold text-success">Total: {{ selectedPurchase.NetTotal | currency:'INR' }}</p>
+              </div>
+            </div>
+
+            <!-- Products Table -->
+            <form [formGroup]="returnForm" (ngSubmit)="submitReturnRequest()">
+              <h6 class="fw-bold mb-2 text-secondary">Products</h6>
+              <div class="table-responsive shadow-sm rounded">
+                <table class="table table-striped table-bordered table-hover table-sm align-middle mb-0 text-start">
+                  <thead class="table-primary text-uppercase small">
+                    <tr>
+                      <th>Sl No</th>
+                      <th>Product</th>
+                      <th>Purchased Qty</th>
+                      <th>Remaining Qty</th>
+                      <th>Unit Price</th>
+                      <th>Subtotal</th>
+                      <th>Return Qty</th>
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="items">
+                    @for (ctrl of items.controls; track $index; let j = $index) {
+                      <tr [formGroupName]="j" [class.table-warning]="ctrl.get('returnQty')?.value > 0">
+                        <td>{{ j + 1 }}</td>
+                        <td>{{ selectedPurchase.Items[j].ProductName}}</td>
+                        <td>{{ selectedPurchase.Items[j].Quantity }}</td>
+                        <td>{{ selectedPurchase.Items[j].RemainingQuantity }}</td>
+                        <td>{{ selectedPurchase.Items[j].UnitPrice | currency:'INR' }}</td>
+                        <td>{{ selectedPurchase.Items[j].Quantity * selectedPurchase.Items[j].UnitPrice | currency:'INR' }}</td>
+                        <td style="width: 120px;">
+                          <input type="text" class="form-control form-control-sm"
+                                 formControlName="returnQty" [min]="0" [max]="selectedPurchase.Items[j].RemainingQuantity" appOnlyNumber />
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Return Request Info -->
+              <div class="border-top pt-3 mt-3">
+                <h6 class="fw-bold text-secondary mb-2">Return Request</h6>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <select class="form-select" formControlName="reason">
+                      <option value="">-- Select Reason --</option>
+                      @for (reason of returnReasons; track reason.id) {
+                        <option [value]="reason.id">{{ reason.name }}</option>
+                      }
+                    </select>
+                    @if (returnForm.get('reason')?.touched && returnForm.get('reason')?.invalid) {
+                      <div class="text-danger small mt-1">Reason is required</div>
+                    }
+                  </div>
+                  <div class="col-md-6">
+                    <input type="text" class="form-control" placeholder="Comments (optional)"
+                           formControlName="comments">
+                  </div>
+                </div>
+                <div class="text-end mt-3">
+                  <button class="btn btn-danger px-4" [disabled]="!returnForm.valid">
+                    Submit Return
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        }
+      </div>
     </div>
   </div>
+</div>

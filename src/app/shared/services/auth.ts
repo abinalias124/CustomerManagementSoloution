@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -37,9 +37,17 @@ export class Auth {
   }
   
    //  Get All Products
-   getProducts(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/Product`);
-  }
+  // Get All Products (with pagination & sorting)
+getProducts(params: { 
+  search?: string; 
+  pageNumber?: number; 
+  pageSize?: number; 
+  sortBy?: string; 
+  sortOrder?: string; 
+}): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/Product`, { params: params as any });
+}
+
   
 
   //  Get Product by ID
@@ -119,4 +127,56 @@ export class Auth {
   getMyPurchases(params: { pageNumber: number; pageSize: number; sortBy?: string; sortOrder?: string }): Observable<any> {
     return this.http.get(`${this.apiUrl}/Purchase/my`, { params: params as any });
   }
+
+   // 1) Create Return Request (User)
+   createReturnRequest(payload: any) {
+    return this.http.post(`${this.apiUrl}/return/request`, payload);
+  }
+ // 2) Approve Return Request (Admin)
+approveReturnRequest(returnRequestId: number): Observable<any> {
+  return this.http.post(`${this.apiUrl}/return/${returnRequestId}/approve`, {});
+}
+
+// 3) Complete Return (Admin)
+completeReturn(payload: { returnRequestId: number; isProductGood: boolean }): Observable<any> {
+  return this.http.post(`${this.apiUrl}/return/complete`, payload);
+}
+
+// 4) Get All Returns (Admin, SuperAdmin)
+getAllReturns(params: {
+  pageNumber: number;
+  pageSize: number;
+  sortBy?: string;
+  sortOrder?: string;
+  searchTerm?: string;
+  status?: number;
+}): Observable<any> {
+  return this.http.get(`${this.apiUrl}/return/all`, { params: params as any });
+}
+
+// 5) Get Return By Id (Admin, SuperAdmin)
+getReturnById(id: number): Observable<any> {
+  return this.http.get(`${this.apiUrl}/return/${id}`);
+}
+
+// 6) Get My Returns (User)
+getMyReturns(params: { pageNumber: number; pageSize: number; sortBy?: string; sortOrder?: string; searchTerm?: string;status?: number }): Observable<any> {
+  return this.http.get(`${this.apiUrl}/return/my`, { params: params as any });
+}
+//dashboard api
+getDashboardSummary(): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/Dashboard/summary`).pipe(
+    map(res => {
+      // Create a copy excluding unwanted fields
+      const filtered = { ...res } as any;
+      delete filtered.NextBadgeTarget;
+      delete filtered.AmountNeededForNextBadge;
+      return filtered;
+    })
+  );
+}
+logout(): Observable<any> {
+  return this.http.post(`${this.apiUrl}/Auth/logout`, {});
+}
+
 }

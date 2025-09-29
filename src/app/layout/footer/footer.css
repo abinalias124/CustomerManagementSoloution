@@ -1,5 +1,13 @@
+/* Footer styling */
 .footer {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-  }
+
+    background-color: #0a2342;             /* Navy blue text to match theme */
+  padding: 1rem;
+  border-top: 2px solid #e0e0e0;
+  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1); /* subtle shadow */
+  font-size: 0.9rem;
+}
+
+.footer strong {
+  color: #1e90ff; /* highlight CMS with theme blue */
+}

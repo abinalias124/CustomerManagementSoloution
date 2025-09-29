@@ -1,0 +1,47 @@
+/* Card hover effect */
+.card-hover:hover {
+    transform: translateY(-4px);
+    transition: all 0.2s ease-in-out;
+  }
+  
+  /* Badge Circle Colors */
+  .badge-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+  
+  .badge-silver { background-color: #FFD700; }
+  .badge-gold { background-color: #FFD700; }
+  .badge-platinum { background-color:#FFD700; }
+  .badge-bronze { background-color: #FFD700;}
+
+  
+  /* Profile Completion Bar */
+  .profile-progress {
+    height: 25px;
+    border-radius: 12px;
+    background-color: #e9ecef;
+    overflow: hidden;
+  }
+  
+  .profile-progress .progress-bar {
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: width 1s ease-in-out;
+  }
+  
+  /* Spacing between top icons and titles */
+  .card i {
+    margin-bottom: 8px;
+  }
+  
